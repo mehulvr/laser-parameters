@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Parameters Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Material Parameters Database</h1>
+
+    <div class="form-container">
+        <h2>Add or Update Material Parameters</h2>
+        <form id="materialForm">
+            <label for="material">Material:</label><br>
+            <input type="text" id="material" name="material" required><br><br>
+
+            <label for="thickness">Thickness:</label><br>
+            <input type="number" step="0.01" id="thickness" name="thickness" required><br><br>
+
+            <h3>Cutting Parameters</h3>
+            <label for="cuttingPowerMin">Power (Min):</label><br>
+            <input type="number" step="0.01" id="cuttingPowerMin" name="cuttingPowerMin" required><br><br>
+
+            <label for="cuttingPowerMax">Power (Max):</label><br>
+            <input type="number" step="0.01" id="cuttingPowerMax" name="cuttingPowerMax" required><br><br>
+
+            <label for="cuttingSpeed">Speed:</label><br>
+            <input type="number" step="0.01" id="cuttingSpeed" name="cuttingSpeed" required><br><br>
+
+            <h3>Laser Etching Parameters</h3>
+            <h4>Image Etch</h4>
+            <label for="imageEtchPowerMin">Power (Min):</label><br>
+            <input type="number" step="0.01" id="imageEtchPowerMin" name="imageEtchPowerMin" required><br><br>
+
+            <label for="imageEtchPowerMax">Power (Max):</label><br>
+            <input type="number" step="0.01" id="imageEtchPowerMax" name="imageEtchPowerMax" required><br><br>
+
+            <label for="imageEtchSpeed">Speed:</label><br>
+            <input type="number" step="0.01" id="imageEtchSpeed" name="imageEtchSpeed" required><br><br>
+
+            <label for="imageEtchLineInterval">Line Interval:</label><br>
+            <input type="number" step="0.01" id="imageEtchLineInterval" name="imageEtchLineInterval" required><br><br>
+
+            <h4>Fill Etch</h4>
+            <label for="fillEtchPowerMin">Power (Min):</label><br>
+            <input type="number" step="0.01" id="fillEtchPowerMin" name="fillEtchPowerMin" required><br><br>
+
+            <label for="fillEtchPowerMax">Power (Max):</label><br>
+            <input type="number" step="0.01" id="fillEtchPowerMax" name="fillEtchPowerMax" required><br><br>
+
+            <label for="fillEtchSpeed">Speed:</label><br>
+            <input type="number" step="0.01" id="fillEtchSpeed" name="fillEtchSpeed" required><br><br>
+
+            <label for="fillEtchLineInterval">Line Interval:</label><br>
+            <input type="number" step="0.01" id="fillEtchLineInterval" name="fillEtchLineInterval" required><br><br>
+
+            <label for="notes">Notes:</label><br>
+            <textarea id="notes" name="notes" rows="4"></textarea><br><br>
+
+            <label for="updatedBy">Updated By (Initials):</label><br>
+            <input type="text" id="updatedBy" name="updatedBy" required><br><br>
+
+            <label for="updateDate">Update Date:</label><br>
+            <input type="date" id="updateDate" name="updateDate" required><br><br>
+
+            <button type="button" onclick="addOrUpdateMaterial()">Submit</button>
+        </form>
+    </div>
+
+    <h2>Materials Database</h2>
+    <label for="filterMaterial">Filter by Material:</label>
+    <select id="filterMaterial" onchange="filterTable()">
+        <option value="">All</option>
+    </select>
+    <button onclick="sortTable()">Sort Alphabetically</button>
+    <table id="materialsTable">
+        <thead>
+            <tr>
+                <th>Material</th>
+                <th>Thickness</th>
+                <th>Cutting Power (Min)</th>
+                <th>Cutting Power (Max)</th>
+                <th>Cutting Speed</th>
+                <th>Image Etch Power (Min)</th>
+                <th>Image Etch Power (Max)</th>
+                <th>Image Etch Speed</th>
+                <th>Image Etch Line Interval</th>
+                <th>Fill Etch Power (Min)</th>
+                <th>Fill Etch Power (Max)</th>
+                <th>Fill Etch Speed</th>
+                <th>Fill Etch Line Interval</th>
+                <th>Notes</th>
+                <th>Updated By</th>
+                <th>Update Date</th>
+                <th>History</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <h2>Limitations</h2>
+    <ul>
+        <li>Ensure parameters are precise and tested before submission.</li>
+        <li>Duplicate entries for the same material and thickness are not allowed.</li>
+        <li>Historical records cannot be edited but can be reviewed.</li>
+    </ul>
+
+    <script>
+        const materialsDatabase = [];
+
+        function addOrUpdateMaterial() {
+            const form = document.getElementById('materialForm');
+            const material = form.material.value;
+            const thickness = parseFloat(form.thickness.value);
+            const cuttingPowerMin = parseFloat(form.cuttingPowerMin.value);
+            const cuttingPowerMax = parseFloat(form.cuttingPowerMax.value);
+            const cuttingSpeed = parseFloat(form.cuttingSpeed.value);
+            const imageEtchPowerMin = parseFloat(form.imageEtchPowerMin.value);
+            const imageEtchPowerMax = parseFloat(form.imageEtchPowerMax.value);
+            const imageEtchSpeed = parseFloat(form.imageEtchSpeed.value);
+            const imageEtchLineInterval = parseFloat(form.imageEtchLineInterval.value);
+            const fillEtchPowerMin = parseFloat(form.fillEtchPowerMin.value);
+            const fillEtchPowerMax = parseFloat(form.fillEtchPowerMax.value);
+            const fillEtchSpeed = parseFloat(form.fillEtchSpeed.value);
+            const fillEtchLineInterval = parseFloat(form.fillEtchLineInterval.value);
+            const notes = form.notes.value;
+            const updatedBy = form.updatedBy.value;
+            const updateDate = form.updateDate.value;
+
+            const existingEntryIndex = materialsDatabase.findIndex(entry => 
+                entry.material === material && entry.thickness === thickness);
+
+            if (existingEntryIndex > -1) {
+                const existingEntry = materialsDatabase[existingEntryIndex];
+                existingEntry.history.push({
+                    cuttingPowerMin: existingEntry.cuttingPowerMin,
+                    cuttingPowerMax: existingEntry.cuttingPowerMax,
+                    cuttingSpeed: existingEntry.cuttingSpeed,
+                    imageEtchPowerMin: existingEntry.imageEtchPowerMin,
+                    imageEtchPowerMax: existingEntry.imageEtchPowerMax,
+                    imageEtchSpeed: existingEntry.imageEtchSpeed,
+                    imageEtchLineInterval: existingEntry.imageEtchLineInterval,
+                    fillEtchPowerMin: existingEntry.fillEtchPowerMin,
+                    fillEtchPowerMax: existingEntry.fillEtchPowerMax,
+                    fillEtchSpeed: existingEntry.fillEtchSpeed,
+                    fillEtchLineInterval: existingEntry.fillEtchLineInterval,
+                    notes: existingEntry.notes,
+                    updatedBy: existingEntry.updatedBy,
+                    updateDate: existingEntry.updateDate
+                });
+                existingEntry.cuttingPowerMin = cuttingPowerMin;
+                existingEntry.cuttingPowerMax = cuttingPowerMax;
+                existingEntry.cuttingSpeed = cuttingSpeed;
+                existingEntry.imageEtchPowerMin = imageEtchPowerMin;
+                existingEntry.imageEtchPowerMax = imageEtchPowerMax;
+                existingEntry.imageEtchSpeed = imageEtchSpeed;
+                existingEntry.imageEtchLineInterval = imageEtchLineInterval;
+                existingEntry.fillEtchPowerMin = fillEtchPowerMin;
+                existingEntry.fillEtchPowerMax = fillEtchPowerMax;
+                existingEntry.fillEtchSpeed = fillEtchSpeed;
+                existingEntry.fillEtchLineInterval = fillEtchLineInterval;
+                existingEntry.notes = notes;
+                existingEntry.updatedBy = updatedBy;
+                existingEntry.updateDate = updateDate;
+            } else {
+                materialsDatabase.push({
+                    material,
+                    thickness,
+                    cuttingPowerMin,
+                    cuttingPowerMax,
+                    cuttingSpeed,
+                    imageEtchPowerMin,
+                    imageEtchPowerMax,
+                    imageEtchSpeed,
+                    imageEtchLineInterval,
+                    fillEtchPowerMin,
+                    fillEtchPowerMax,
+                    fillEtchSpeed,
+                    fillEtchLineInterval,
+                    notes,
+                    updatedBy,
+                    updateDate,
+                    history: []
+                });
+
+                updateFilterOptions();
+            }
+
+            renderTable();
+            form.reset();
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('materialsTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            materialsDatabase.forEach(entry => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${entry.material}</td>
+                    <td>${entry.thickness}</td>
+                    <td>${entry.cuttingPowerMin}</td>
+                    <td>${entry.cuttingPowerMax}</td>
+                    <td>${entry.cuttingSpeed}</td>
+                    <td>${entry.imageEtchPowerMin}</td>
+                    <td>${entry.imageEtchPowerMax}</td>
+                    <td>${entry.imageEtchSpeed}</td>
+                    <td>${entry.imageEtchLineInterval}</td>
+                    <td>${entry.fillEtchPowerMin}</td>
+                    <td>${entry.fillEtchPowerMax}</td>
+                    <td>${entry.fillEtchSpeed}</td>
+                    <td>${entry.fillEtchLineInterval}</td>
+                    <td>${entry.notes}</td>
+                    <td>${entry.updatedBy}</td>
+                    <td>${entry.updateDate}</td>
+                    <td>
+                        <button onclick="viewHistory('${entry.material}', ${entry.thickness})">View History</button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateFilterOptions() {
+            const filterMaterial = document.getElementById('filterMaterial');
+            const materials = Array.from(new Set(materialsDatabase.map(entry => entry.material)));
+            filterMaterial.innerHTML = '<option value="">All</option>' + materials.map(material => `<option value="${material}">${material}</option>`).join('');
+        }
+
+        function filterTable() {
+            const filterMaterial = document.getElementById('filterMaterial').value;
+            const tableBody = document.getElementById('materialsTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            materialsDatabase.filter(entry => !filterMaterial || entry.material === filterMaterial)
+                .forEach(entry => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${entry.material}</td>
+                        <td>${entry.thickness}</td>
+                        <td>${entry.cuttingPowerMin}</td>
+                        <td>${entry.cuttingPowerMax}</td>
+                        <td>${entry.cuttingSpeed}</td>
+                        <td>${entry.imageEtchPowerMin}</td>
+                        <td>${entry.imageEtchPowerMax}</td>
+                        <td>${entry.imageEtchSpeed}</td>
+                        <td>${entry.imageEtchLineInterval}</td>
+                        <td>${entry.fillEtchPowerMin}</td>
+                        <td>${entry.fillEtchPowerMax}</td>
+                        <td>${entry.fillEtchSpeed}</td>
+                        <td>${entry.fillEtchLineInterval}</td>
+                        <td>${entry.notes}</td>
+                        <td>${entry.updatedBy}</td>
+                        <td>${entry.updateDate}</td>
+                        <td>
+                            <button onclick="viewHistory('${entry.material}', ${entry.thickness})">View History</button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+        }
+
+        function sortTable() {
+            materialsDatabase.sort((a, b) => a.material.localeCompare(b.material));
+            renderTable();
+        }
+
+        function viewHistory(material, thickness) {
+            const entry = materialsDatabase.find(entry => 
+                entry.material === material && entry.thickness === thickness);
+
+            if (entry) {
+                alert(`History for ${material} (Thickness: ${thickness}):\n` + 
+                    entry.history.map(h => `- Updated By: ${h.updatedBy} on ${h.updateDate}\n  Cutting Power (Min): ${h.cuttingPowerMin}, Cutting Power (Max): ${h.cuttingPowerMax}, Speed: ${h.cuttingSpeed}\n Notes: ${h.notes}`).join('\n\n'));
+ }
+        }
+    </script>
+</body>
+</html>
